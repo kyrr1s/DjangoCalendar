@@ -1,0 +1,29 @@
+{% extends 'planner/base.html' %}
+
+{% block title %}
+Planner
+{% endblock %}
+
+{% block content %}
+<div class="clearfix mb-3">
+    <a class="btn btn-danger float-right" href="{% url 'accounts:exit' %}">Log Out</a>
+</div>
+
+<div class="clearfix mb-3">
+    <a class="btn btn-info float-left" href="{% url 'planner:planner' %}?{{ prev_month }}">Previous Month</a>
+    <a class="btn btn-info float-right" href="{% url 'planner:planner' %}?{{ next_month }}">Next Month</a>
+    <a class="btn btn-info float-right mr-2" href="{% url 'planner:event_new' %}">New Event</a>
+</div>
+
+<div class="d-flex justify-content-around mb-3">
+    <a class="btn btn-outline-info" href="{% url 'planner:running_events' %}">Running Events</a>
+    <a class="btn btn-outline-info" href="{% url 'planner:upcoming_events' %}">Upcoming Events</a>
+    <a class="btn btn-outline-info" href="{% url 'planner:completed_events' %}">Completed Events</a>
+    <a class="btn btn-outline-info" href="{% url 'planner:all_events' %}">All Events</a>
+    <a class="btn btn-outline-info" href="{% url 'support:ticket_list' %}">My Tickets</a>
+</div>
+
+<div class="planner">
+    {{ planner }}
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'planner/base.html' %}
+
+{% block title %}
+Add Member to Event
+{% endblock %}
+
+{% block content %}
+{% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+{% else %}
+    <div class="clearfix">
+      <a class="btn btn-info left" href="{% url 'planner:planner' %}">Back to planner</a>
+      <a class="btn btn-info left" href="{% url 'planner:event_edit' event.id %}">Back to edit</a>
+    </div>
+
+    <h3>Add Member to event "{{ event.title }}"</h3>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-info">Add Member</button>
+    </form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'support/base.html' %}
+
+{% block title %}My Tickets{% endblock %}
+
+{% block content %}
+{% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+{% else %}
+    <h2>My Tickets</h2>
+    <p>
+        {% if user.is_superuser %}
+            Viewing as superuser.
+            <a href="{% url 'support:manage_tickets' %}" class="btn btn-info mb-2">Manage All Tickets</a>
+        {% elif user.is_staff %}
+            Viewing as support staff.
+            <a href="{% url 'support:manage_tickets' %}" class="btn btn-info mb-2">Manage User Tickets</a>
+        {% endif %}
+    </p>
+    <div class="mb-2">
+        <a href="{% url 'support:create_ticket' %}" class="btn btn-primary mb-2">Create New Ticket</a>
+    </div>
+
+    {% if tickets %}
+        <ul class="list-group">
+        {% for ticket in tickets %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ ticket.subject }} - <span class="badge badge-secondary">{{ ticket.get_status_display }}</span></span>
+                <div class="btn-group">
+                    <a href="{% url 'support:view_ticket' ticket.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    {% if not ticket.is_closed %}
+                        <a href="?close_ticket={{ ticket.id }}" class="btn btn-sm btn-outline-warning">Close</a>
+                    {% endif %}
+                    {% if ticket.is_closed %}
+                        <a href="?reopen_ticket={{ ticket.id }}" class="btn btn-sm btn-outline-success">Reopen</a>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tickets available.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

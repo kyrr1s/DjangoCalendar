@@ -1,0 +1,22 @@
+# SMTP
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME= # unique email
+
+# DB
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=scheduler
+SQL_USER=postgres
+SQL_PASSWORD=postgres
+SQL_HOST=db
+SQL_PORT=5432
+
+# Django
+DJANGO_SUPERUSER_USERNAME= # some username 
+DJANGO_SUPERUSER_EMAIL= # some email
+DJANGO_SUPERUSER_PASSWORD= # some password
+DEBUG= False # True, if you want to see django debug pages
+SECRET_KEY= # unique secret key for Django. You can generate your own:
+# from django.core.management.utils import get_random_secret_key
+# print(get_random_secret_key())
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]

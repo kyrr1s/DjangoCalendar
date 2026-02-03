@@ -1,0 +1,45 @@
+{% extends 'support/base.html' %}
+
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+{% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+{% else %}
+    <div class="card">
+        <div class="card-header">
+            <h5>{{ ticket.subject }}</h5>
+            <a href="{% url 'support:ticket_list' %}" class="btn btn-primary btn-sm float-right">Back</a>
+        </div>
+        <div class="card-body">
+            <p><strong>User:</strong> {{ ticket.user.username }}</p>
+            <p><strong>Status:</strong> {{ ticket.get_status_display }}</p>
+            <p><strong>Created at:</strong> {{ ticket.created_at }}</p>
+            <h6>Description:</h6>
+            <p class="border p-2">{{ ticket.description }}</p>
+
+            <h6>Replies:</h6>
+            {% if replies %}
+                <ul class="list-group list-group-flush">
+                {% for reply in replies %}
+                    <li class="list-group-item">
+                        <small class="text-muted">{{ reply.created_at }}</small>
+                        <p><strong>{{ reply.user.username }}</strong>: {{ reply.message }}</p>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No replies yet.</p>
+            {% endif %}
+            
+            {% if reply_form %}
+                <form method="post">
+                    {% csrf_token %}
+                    {{ reply_form.as_p }}
+                    <button type="submit" class="btn btn-primary mt-2">Send</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

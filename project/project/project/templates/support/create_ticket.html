@@ -1,0 +1,16 @@
+{% extends 'support/base.html' %}
+
+{% block title %}Create Ticket{% endblock %}
+
+{% block content %}
+{% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+{% else %}
+    <h2>Create Ticket</h2>
+    <form method="post" class="bg-light p-4 rounded shadow">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary mt-3">Create</button>
+    </form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+Vagrant.configure("2") do |config|
+    # change this to ubuntu/jammy64
+    config.vm.box = "jammy64.box" 
+    config.vm.box_check_update = false
+  
+    config.vm.network "forwarded_port", guest: 8080, host: 8080 # nginx http
+    config.vm.network "forwarded_port", guest: 8443, host: 8443 # nginx https
+    config.vm.network "forwarded_port", guest: 8000, host: 8000 # django
+    
+    config.vm.hostname = "backend-vm"
+  
+    config.vm.provider "virtualbox" do |vb|
+      vb.name = "backend-vm"
+      vb.memory = 2048
+      vb.cpus = 2
+      vb.gui = false
+      vb.check_guest_additions=false
+    end
+  
+    config.vm.synced_folder "./project", "/data"
+
+    config.vm.provision "shell", inline: <<-SHELL
+      # Docker installation
+      apt-get update
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      sh get-docker.sh
+  
+      # Generating keys and certs for https
+      openssl req -nodes -x509 -newkey rsa:4096 -keyout /etc/ssl/private/nginx.key -out /etc/ssl/private/nginx.crt -days 365 -subj "/C=BY"
+  
+      # Secrets creation
+      mkdir -p /data/secrets
+      # This can be done with $(openssl rand -hex 16) for example. But in test purposes we will use default 'root' password.
+      echo "testpassword1!" > /data/secrets/smtp_password
+      echo "root" > /data/secrets/django_superuser_password
+  
+      # Building and running
+      cd /data
+      docker compose up -d --build
+    SHELL
+  end
+    

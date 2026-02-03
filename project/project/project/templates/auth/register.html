@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Register</h2>
+        <form action="#" method="post" class="bg-light p-5 rounded shadow-sm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="label" for="username">Username</label>
+                {{ form.username }}
+                <span class="text-danger">{{ form.errors.username }}</span>
+            </div>
+            <div class="form-group">
+                <label class="label" for="password1">Password</label>
+                {{ form.password1 }}
+                <span class="text-danger">{{ form.errors.password1 }}</span>
+            </div>
+            <div class="form-group">
+                <label class="label" for="password2">Password confirmation</label>
+                {{ form.password2 }}
+                <span class="text-danger">{{ form.errors.password2 }}</span>
+            </div>
+            <div class="form-group form-check">
+                {{ form.is_staff }}
+                <label class="form-check-label" for="is_staff">Register as support staff</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+            <p class="mt-4 text-center">I'm already a member! <a href="{% url 'accounts:login' %}">Login</a></p>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

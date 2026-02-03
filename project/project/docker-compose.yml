@@ -1,0 +1,118 @@
+version: '3.9'
+
+services:
+  db: # used as db in django
+    container_name: postgres
+    image: postgres:15.0-alpine
+    volumes: # we do not use bind mount
+      - postgres_data:/var/lib/postgresql/data/
+    environment: # we set default variables
+      - POSTGRES_USER=${SQL_USER:-postgres}
+      - POSTGRES_PASSWORD=${SQL_PASSWORD:-postgres}
+      - POSTGRES_DB=${SQL_DATABASE:-scheduler}
+    env_file:
+      - ./.env
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-U", "${SQL_USER:-postgres}", "-d", "${SQL_DATABASE:-scheduler}"]
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+
+  redis: # used for caching in django
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  django:
+    build: ./project #path to Dockerfile
+    container_name: django
+    command: > #superuser creds are set to env vars DJANGO_SUPERUSER_PASSWORD, DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL
+      sh -c "
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py shell -c 'from app.utils import createsuperuser_at_start; createsuperuser_at_start()' &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./project/:/usr/src/project/  
+    depends_on:
+      - db
+      - redis
+    environment:
+      DEBUG: "${DEBUG:-1}"
+      SECRET_KEY: "${SECRET_KEY:-secret}" #unique
+      DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-localhost}"
+      SQL_ENGINE: "${SQL_ENGINE:-django.db.backends.postgresql}"
+      SQL_DATABASE: "${SQL_DATABASE:-goods_catalog}"
+      SQL_USER: "${SQL_USER:-postgres}"
+      SQL_PASSWORD: "${SQL_PASSWORD:-postgres}"
+      SQL_HOST: "${SQL_HOST:-db}"
+      SQL_PORT: "${SQL_PORT:-5432}"
+      DJANGO_SUPERUSER_USERNAME: "${DJANGO_SUPERUSER_USERNAME:-root}"
+      DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL:-admin@example.com}"
+      DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD:-root}"
+    env_file:
+      - ./.env
+    ports:
+      - 8000:8000
+    networks:
+      - app_network
+    secrets:
+      - django_superuser_password
+
+  nginx: # service used to handle https and notification service
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    networks:
+      - app_network
+    depends_on:
+      - django
+    restart: unless-stopped
+    secrets:
+      - nginx_ssl_key
+      - nginx_ssl_crt
+
+  notify:
+    container_name: notification
+    build: ./notify # path to Dockerfile
+    environment:
+      SMTP_SERVER: "${SMTP_SERVER:-smtp.gmail.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USERNAME: "${SMTP_USERNAME:-myemail@example.com}"
+    env_file:
+      - ./.env
+    secrets:
+      - smtp_password
+    volumes:
+      - app_data:/app/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+
+volumes:
+  postgres_data:
+  app_data:
+
+secrets:
+  nginx_ssl_key:
+    file: /etc/ssl/private/nginx.key
+  nginx_ssl_crt:
+    file: /etc/ssl/private/nginx.crt
+  smtp_password:
+    file: /data/secrets/smtp_password
+  django_superuser_password:
+    file: /data/secrets/django_superuser_password

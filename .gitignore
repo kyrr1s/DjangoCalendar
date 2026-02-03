@@ -1,0 +1,22 @@
+# cache
+__pycache__/
+
+# django
+db.sqlite3
+db.sqlite3-journal
+migrations/
+
+# pyenv
+.python-version
+
+# env
+.env
+.venv
+venv
+
+# docker secrets
+secrets/
+
+# vagrant
+jammy64.box
+.vagrant

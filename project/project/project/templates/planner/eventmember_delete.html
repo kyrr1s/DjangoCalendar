@@ -1,0 +1,14 @@
+{% extends 'planner/base.html' %}
+
+{% block title %}
+Confirm Member Removal
+{% endblock %}
+
+{% block content %}
+<h3>Are you sure you want to remove {{ object.user.username }} from the event?</h3>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Yes, Remove</button>
+  <a href="{% url 'planner:planner' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

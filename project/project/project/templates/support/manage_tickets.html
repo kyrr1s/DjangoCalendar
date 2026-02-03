@@ -1,0 +1,56 @@
+{% extends 'support/base.html' %}
+
+{% block title %}Manage Tickets{% endblock %}
+
+{% block content %}
+{% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+{% else %}
+    <h2>Manage Tickets</h2>
+    <p>
+        {% if user.is_superuser %}
+            Viewing as superuser.
+        {% elif user.is_staff %}
+            Viewing as support staff.
+        {% endif %}
+    </p>
+    <a href="{% url 'support:ticket_list' %}" class="btn btn-info mb-2">My Tickets</a>
+
+    {% if tickets %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Created at</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.subject }}</td>
+                    <td>{{ ticket.get_status_display }}</td>
+                    <td>{{ ticket.created_at }}</td>
+                    <td>
+                        <a href="{% url 'support:view_ticket' ticket.id %}" class="btn btn-sm btn-primary">View</a>
+                        {% if ticket.is_open %}
+                            <a href="?set_in_progress={{ ticket.id }}" class="btn btn-sm btn-warning">In Progress</a>
+                        {% endif %}
+                        {% if ticket.is_in_progress %}
+                            <a href="?close_ticket={{ ticket.id }}" class="btn btn-sm btn-success">Close</a>
+                        {% endif %}
+                        {% if ticket.is_closed %}
+                            <a href="?reopen_ticket={{ ticket.id }}" class="btn btn-sm btn-danger">Reopen</a>
+                        {% endif %}
+                        <a href="?delete_ticket={{ ticket.id }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tickets available.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}
